@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel Administrativo — Tienda Electrónica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar-bg:#0c0d10;
+    --sidebar-bg-2:#17181b;
+    --sidebar-text:#9a9ba0;
+    --sidebar-text-active:#f5f2f2;
+    --accent:#e8203f;
+    --accent-2:#a8081f;
+    --accent-dim:#3a1116;
+    --bg:#f4f3f3;
+    --surface:#ffffff;
+    --text:#1c1a1b;
+    --text-muted:#6f6b6c;
+    --border:#e7e3e3;
+    --topbar-h:46px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0e0d0e;
+      --surface:#181617;
+      --text:#f1eeee;
+      --text-muted:#948f90;
+      --border:#2b2727;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e0d0e;
+    --surface:#181617;
+    --text:#f1eeee;
+    --text-muted:#948f90;
+    --border:#2b2727;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:calc(var(--topbar-h) + env(safe-area-inset-top,0px));}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    overflow-x:hidden;
+  }
+
+  /* Cintillo superior */
+  #topbar{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    height:calc(var(--topbar-h) + env(safe-area-inset-top,0px));
+    padding:env(safe-area-inset-top,0px) 20px 0 24px;
+    background:linear-gradient(90deg,var(--sidebar-bg),var(--sidebar-bg-2));
+    border-bottom:1px solid rgba(255,255,255,.06);
+    color:var(--sidebar-text);
+  }
+  .brand-text{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:.2px;
+    color:var(--sidebar-text-active);
+    white-space:nowrap;
+  }
+  .top-icons{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:2px;
+    margin-left:auto;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .top-icons::-webkit-scrollbar{ display:none; }
+  .top-icon{
+    position:relative;
+    flex-shrink:0;
+    width:36px;
+    height:34px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#726d6e;
+    cursor:default;
+    transition:background .15s ease, color .15s ease;
+  }
+  .top-icon svg{ width:18px; height:18px; }
+  .top-icon:hover{ background:rgba(255,255,255,.05); color:var(--sidebar-text-active); }
+  .top-icon.active{ background:var(--accent-dim); color:var(--accent); }
+  .top-icon.active::after{
+    content:'';
+    position:absolute;
+    left:8px; right:8px; bottom:-6px;
+    height:3px;
+    border-radius:3px 3px 0 0;
+    background:var(--accent);
+  }
+
+  /* Contenido */
+  main{ padding:34px 40px 40px; }
+  .page-head{ margin-bottom:28px; }
+  .eyebrow{ color:var(--text-muted); font-size:13px; margin:0 0 4px; }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:27px;
+    margin:0;
+    font-weight:600;
+  }
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:48px 32px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .panel .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    color:var(--sidebar-text);
+    background:var(--sidebar-bg-2);
+    padding:5px 11px;
+    border-radius:100px;
+    margin-bottom:6px;
+  }
+  .panel .tag .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .panel h2{ font-family:'Space Grotesk',sans-serif; font-size:20px; margin:0; }
+  .panel p{ color:var(--text-muted); font-size:14.5px; line-height:1.6; margin:0; max-width:60ch; }
+
+
+  /* ===== Recepción y Técnico (portado del index) ===== */
+  /* Recepción: formulario compacto de ingreso */
+  .panel-form{ align-items:stretch; }
+  .panel-form h2{ margin-bottom:18px; }
+  .recepcion-grid{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:14px 16px;
+    width:100%;
+  }
+  .f-field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .f-span2{ grid-column:span 2; }
+  .f-field label{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--text-muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .f-field input,
+  .f-field select{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    color:var(--text);
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:9px 11px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .f-field input:focus,
+  .f-field select:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(232,32,63,.15);
+  }
+
+  /* Campo monto: alineado a la derecha, llenado tipo cajero */
+  .monto-input{ text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* Calendario personalizado (campo Fecha) */
+  .dp-wrap{ position:relative; }
+  .dp-input{ cursor:pointer; padding-right:34px !important; }
+  .dp-ico{ position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none; }
+  .dp-wrap.open .dp-ico{ color:var(--accent); }
+  .dp-pop{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:60; width:296px;
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    box-shadow:0 18px 48px rgba(0,0,0,.28); overflow:hidden;
+    animation:dpIn .14s ease;
+  }
+  .dp-input.is-invalid{ border-color:#dc2626 !important; box-shadow:0 0 0 3px rgba(220,38,38,.15); }
+  .f-field input.is-invalid, .f-field select.is-invalid{ border-color:#dc2626 !important; box-shadow:0 0 0 3px rgba(220,38,38,.15); }
+  .dp-wrap.dp-right .dp-pop{ left:auto; right:0; }
+  .dp-pop[hidden]{ display:none; }
+  @keyframes dpIn{ from{ opacity:0; transform:translateY(-4px);} to{ opacity:1; transform:none;} }
+  .dp-head{
+    display:flex; align-items:center; justify-content:space-between; gap:6px; padding:12px 12px 10px;
+    background:linear-gradient(135deg,var(--sidebar-bg),var(--sidebar-bg-2)); color:var(--sidebar-text-active);
+    border-bottom:2px solid var(--accent);
+  }
+  .dp-title{
+    flex:1; border:none; background:transparent; color:inherit; cursor:pointer; border-radius:8px; padding:6px 8px;
+    font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; text-transform:capitalize; text-align:center;
+  }
+  .dp-title:hover{ background:rgba(255,255,255,.08); }
+  .dp-nav{
+    width:30px; height:30px; flex:none; border:none; border-radius:8px; cursor:pointer; color:inherit; background:rgba(255,255,255,.07);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dp-nav:hover{ background:var(--accent); }
+  .dp-body{ padding:12px; }
+  .dp-week, .dp-days{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .dp-week span{ text-align:center; font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); padding:4px 0 6px; }
+  .dp-week span:nth-child(n+6){ color:var(--accent); opacity:.85; }
+  .dp-day, .dp-cell{
+    border:none; background:transparent; color:var(--text); cursor:pointer; border-radius:9px;
+    font-family:'Inter',sans-serif; font-size:13px; font-variant-numeric:tabular-nums;
+    transition:background .12s ease, color .12s ease;
+  }
+  .dp-day{ height:34px; }
+  .dp-day:hover, .dp-cell:hover{ background:var(--accent-dim); color:#fff; }
+  .dp-day.out{ color:var(--text-muted); opacity:.45; }
+  .dp-day.wknd{ color:var(--accent); }
+  .dp-day.out.wknd{ color:var(--text-muted); }
+  .dp-day.today{ box-shadow:inset 0 0 0 1.5px var(--accent); font-weight:700; }
+  .dp-day.sel, .dp-cell.sel{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff !important; opacity:1; font-weight:700;
+    box-shadow:0 4px 12px rgba(232,32,63,.35);
+  }
+  .dp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .dp-cell{ height:44px; font-size:13.5px; }
+  .dp-cell.cur{ box-shadow:inset 0 0 0 1.5px var(--accent); font-weight:700; }
+  .dp-foot{ display:flex; justify-content:space-between; gap:8px; padding:0 12px 12px; }
+  .dp-foot button{
+    border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:9px; padding:7px 14px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
+  }
+  .dp-foot button:hover{ border-color:var(--accent); color:var(--accent); }
+  .dp-foot .dp-today{ background:linear-gradient(135deg,var(--accent),var(--accent-2)); border-color:transparent; color:#fff; }
+  .dp-foot .dp-today:hover{ color:#fff; filter:brightness(1.07); }
+
+  /* Descripción de la falla: texto de ayuda + límite de caracteres (el límite nunca se recorta) */
+  .ph-wrap{ position:relative; }
+  .ph-fake{ position:absolute; left:12px; right:12px; top:0; bottom:0; display:none; align-items:center; gap:.35em; pointer-events:none; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--text-muted); color:color-mix(in srgb, var(--text-muted) 75%, transparent); }
+  .ph-wrap input:placeholder-shown + .ph-fake{ display:flex; }
+  .ph-t{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .ph-max{ flex:none; white-space:nowrap; }
+  /* listas desplegables sin valor: mismo gris que el placeholder de los campos vacíos */
+  #recepcionPanel select.is-empty, #inventarioPanel select.is-empty{ color:var(--text-muted); color:color-mix(in srgb, var(--text-muted) 75%, transparent); }
+  #recepcionPanel select option, #inventarioPanel select option{ color:var(--text); }
+  #recepcionPanel select option[value=""], #inventarioPanel select option[value=""]{ color:var(--text-muted); }
+  #recepcionPanel select:disabled{ cursor:not-allowed; opacity:1; }
+  .f-submit{ justify-content:flex-end; }
+  .f-submit button{
+    width:100%;
+    height:100%;
+    min-height:38px;
+    border:none;
+    border-radius:9px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    box-shadow:0 4px 14px rgba(232,32,63,.3);
+    transition:filter .15s ease, transform .15s ease;
+  }
+  .f-submit button:hover{ filter:brightness(1.06); }
+  .f-submit button:active{ transform:scale(.97); }
+
+
+  /* Equipos recibidos en taller */
+  #equiposPanel{ margin-top:18px; }
+  .eq-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; margin-bottom:18px; }
+  .eq-head h2{ margin:0 !important; }
+  .eq-count{ font-size:11.5px; font-weight:600; color:var(--text-muted); background:var(--bg); border:1px solid var(--border); border-radius:100px; padding:3px 11px; white-space:nowrap; }
+  .eq-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .eq-chip{ font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; padding:4px 11px; border-radius:100px; border:1px solid var(--border); color:var(--text-muted); background:var(--bg); cursor:pointer; }
+  .eq-chip:hover{ border-color:var(--accent); color:var(--accent); }
+  .eq-chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .eq-tbl{ width:100%; margin-top:6px; overflow-x:auto; }
+  .eq-in{ min-width:1040px; }
+  .eq-hd, .eq-rw{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:0; align-items:stretch; --eq-line:rgba(156,163,175,.35); }
+  .eq-hd{ font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); padding:0; border-bottom:1px solid var(--border); line-height:1.3; }
+  .eq-rw{ padding:0; border-bottom:1px solid var(--border); font-size:13px; }
+  .eq-rw:last-child{ border-bottom:none; }
+  .eq-rw:hover{ background:color-mix(in srgb, var(--accent) 4%, transparent); }
+  .eq-hd > span{ min-width:0; text-align:center; display:flex; align-items:center; justify-content:center; padding:0 12px 9px; border-left:1px solid var(--eq-line); }
+  .eq-cl{ min-width:0; text-align:left; display:flex; flex-direction:column; justify-content:center; padding:11px 12px; border-left:1px solid var(--eq-line); }
+  .eq-hd > span:first-child, .eq-cl:first-child{ padding-left:0; border-left:none; }
+  .eq-cl.eq-c{ flex-direction:row; align-items:center; justify-content:center; text-align:center; }
+  .eq-p1{ font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .eq-p2{ font-size:11.5px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .eq-id{ font-family:ui-monospace,Menlo,monospace; font-weight:700; color:var(--accent); }
+  .eq-nivel{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:0; margin:0; border:none; background:none; cursor:pointer; color:var(--c); font-family:inherit; font-size:10.5px; font-weight:600; line-height:12px; white-space:nowrap; transition:transform .1s, opacity .15s; }
+  .eq-nivel svg{ width:15px; height:15px; display:block; flex:none; }
+  .eq-nivel:hover{ opacity:.8; }
+  .eq-nivel:active{ transform:scale(.94); }
+  .eq-pill{ display:inline-block; font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; border:1px solid color-mix(in srgb, var(--c) 35%, transparent); background-color:color-mix(in srgb, var(--c) 12%, transparent); color:var(--c); white-space:nowrap; }
+  #enfoqueModal{ background:rgba(8,8,12,.28); backdrop-filter:none; -webkit-backdrop-filter:none; }
+  .enf-box{ max-width:960px; min-height:240px; padding:42px 24px 26px; text-align:left; position:relative; border-top:4px solid var(--c, #9ca3af); }
+  .enf-info{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:14px 12px; margin:0; padding:0; }
+  .enf-f{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .enf-f.is-wide{ grid-column:span 2; }
+  .enf-fl{ font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .enf-fv{ height:36px; display:flex; align-items:center; padding:0 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg); font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .enf-info + .enf-steps{ margin-top:28px; }
+  @media (max-width:760px){
+    .enf-info{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .enf-f.is-wide{ grid-column:span 2; }
+  }
+  .enf-steps{ list-style:none; margin:14px 0 0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); position:relative; }
+  .enf-steps::before{ content:""; position:absolute; top:20px; left:12.5%; right:12.5%; height:3px; transform:translateY(-50%); border-radius:2px; background:color-mix(in srgb, var(--text-muted) 28%, transparent); }
+  .enf-step{ position:relative; display:flex; flex-direction:column; align-items:center; gap:8px; min-width:0; }
+  .enf-dot{ width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; background:color-mix(in srgb, var(--text-muted) 22%, var(--surface)); color:var(--text-muted); box-shadow:0 0 0 4px var(--surface); transition:background-color .2s, box-shadow .2s; }
+  .enf-lbl{ font-size:12px; font-weight:500; color:var(--text-muted); text-align:center; }
+  .enf-step .enf-dot{ background:color-mix(in srgb, var(--c) 18%, var(--surface)); color:var(--c); }
+  .enf-step.is-active .enf-dot{ background:var(--c); color:#fff; box-shadow:0 0 0 4px var(--surface), 0 6px 14px color-mix(in srgb, var(--c) 45%, transparent); }
+  .enf-step.is-active .enf-lbl{ font-weight:600; color:var(--text); }
+  .enf-x{ position:absolute; top:10px; right:12px; width:30px; height:30px; border:none; background:transparent; color:var(--text-muted); font-size:22px; line-height:1; cursor:pointer; border-radius:8px; }
+  .enf-x:hover{ color:var(--text); background:var(--bg); }
+  .eq-ac{ display:flex; gap:6px; margin-bottom:2px; }
+  .eq-ib{ width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-muted); display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; padding:0; }
+  .eq-ib:hover{ color:var(--accent); border-color:var(--accent); }
+  .eq-ib.eq-wp{ color:#059669; border-color:color-mix(in srgb,#059669 35%,transparent); background:color-mix(in srgb,#059669 10%,transparent); }
+  .eq-empty{ padding:26px 0 6px; text-align:center; color:var(--text-muted); font-size:13px; }
+  .eq-ticket{ max-width:400px; text-align:left; }
+  .eq-ticket h3{ text-align:center; margin-bottom:14px; }
+  .eq-ticket dl{ margin:0 0 18px; display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13px; }
+  .eq-ticket dt{ color:var(--text-muted); }
+  .eq-ticket dd{ margin:0; font-weight:600; overflow-wrap:anywhere; }
+  @media print{ body *{ visibility:hidden; } #ticketModal, #ticketModal *{ visibility:visible; } #ticketModal{ position:absolute; inset:0; background:#fff; } #ticketModal .cm-actions{ display:none; } }
+
+  @media (max-width:920px){
+    .recepcion-grid{ grid-template-columns:repeat(3, 1fr); }
+    .f-span2{ grid-column:span 1; }
+  }
+  @media (max-width:560px){
+    .recepcion-grid{ grid-template-columns:repeat(2, 1fr); }
+  }
+
+
+  /* ===== Panel Técnico: montos, notas, repuestos, estatus por ícono ===== */
+  .enf-box{ max-height:calc(100vh - 40px); overflow:auto; }
+  .enf-step{ cursor:pointer; }
+  .enf-step .enf-dot{ transition:transform .12s; }
+  .enf-step:hover .enf-dot{ transform:scale(1.08); }
+  .enf-step:focus-visible{ outline:none; }
+  .enf-step:focus-visible .enf-dot{ outline:2px solid var(--c); outline-offset:3px; }
+  .enf-low{ margin-top:28px; display:flex; flex-direction:column; gap:16px; }
+  .enf-kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+  .enf-kc{ display:flex; flex-direction:column; gap:3px; min-width:0; padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .enf-kc b, #enfAdj, .enf-adjw span{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--text); }
+  .enf-adjw{ display:flex; align-items:center; height:22px; }
+  #enfAdj{ flex:1; min-width:0; width:100%; height:22px; padding:0; border:none; border-radius:0; background:transparent; box-sizing:border-box; }
+  #enfAdj:focus{ outline:none; }
+  #enfAdj::placeholder{ color:var(--text); opacity:1; font-weight:700; }
+  .enf-kl{ font-size:10px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .enf-cols{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
+  .enf-card{ display:flex; flex-direction:column; gap:10px; min-width:0; padding:14px 16px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .enf-ch h3{ margin:0; font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; color:var(--text); }
+  #enfNotas{ width:100%; flex:1 1 0; height:0; min-height:120px; resize:none; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font:13px/1.5 'Inter',sans-serif; box-sizing:border-box; }
+  #enfNotas:focus, #enfSel:focus{ outline:2px solid var(--c); outline-offset:1px; }
+  .enf-add{ display:flex; gap:8px; }
+  #enfSel{ flex:1; min-width:0; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--text); font:13px 'Inter',sans-serif; }
+  .enf-pm{ width:30px; height:30px; flex:none; display:grid; place-items:center; padding:0; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); font:600 17px/1 'Inter',sans-serif; cursor:pointer; transition:background .15s, border-color .15s, color .15s; }
+  .enf-pm.plus:hover:not(:disabled){ border-color:#16a34a; color:#16a34a; background:rgba(22,163,74,.08); }
+  .enf-pm.minus:hover:not(:disabled){ border-color:#dc2626; color:#dc2626; background:rgba(220,38,38,.08); }
+  .enf-pm:disabled{ opacity:.4; cursor:not-allowed; }
+  #enfAdd{ width:36px; height:36px; background:#16a34a; border-color:#16a34a; color:#fff; }
+  #enfAdd:hover{ filter:brightness(1.08); background:#16a34a; color:#fff; }
+  .enf-rows{ display:flex; flex-direction:column; flex:none; height:141px; overflow:auto; } /* 3 repuestos visibles, el resto con scroll */
+  .enf-row{ display:grid; grid-template-columns:minmax(0,1fr) auto 74px; gap:10px; align-items:center; padding:8px 2px; border-bottom:1px solid var(--border); }
+  .enf-row:last-child{ border-bottom:none; }
+  .enf-rn{ display:flex; flex-direction:column; min-width:0; }
+  .enf-rn b{ font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .enf-rn small{ font-size:11px; color:var(--text-muted); }
+  .enf-q{ display:flex; align-items:center; gap:8px; }
+  .enf-q span{ min-width:22px; text-align:center; font-weight:600; font-size:13px; font-variant-numeric:tabular-nums; }
+  .enf-rs{ text-align:right; font-weight:600; font-size:13px; font-variant-numeric:tabular-nums; }
+  .enf-empty{ flex:1; display:flex; align-items:center; justify-content:center; padding:18px 12px; border:1px dashed var(--border); border-radius:10px; text-align:center; font-size:12.5px; color:var(--text-muted); }
+  .enf-bar{ display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--border); }
+  .enf-acts{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+  .enf-btn{ height:38px; padding:0 16px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font:600 13px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
+  .enf-btn:hover:not(:disabled){ border-color:var(--text-muted); }
+  .enf-btn.is-ghost{ background:transparent; color:var(--text-muted); }
+  .enf-btn.is-save{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .enf-btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .enf-warn{ position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(8,8,12,.5); }
+  .enf-warn-box{ width:min(460px,100%); padding:22px 24px; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:0 20px 50px rgba(0,0,0,.35); }
+  .enf-warn-box h4{ margin:0 0 6px; font-family:'Space Grotesk',sans-serif; font-size:16px; color:var(--text); }
+  .enf-warn-box p{ margin:0 0 18px; font-size:13px; line-height:1.5; color:var(--text-muted); }
+  .enf-warn-acts{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .enf-warn .enf-btn:focus, .enf-warn .enf-btn:focus-visible{ outline:none; }
+  .enf-warn .enf-btn:focus-visible{ border-color:var(--text-muted); }
+  .enf-warn-box:focus{ outline:none; }
+  @media (max-width:760px){
+    .enf-cols{ grid-template-columns:1fr; }
+    #enfNotas{ flex:none; height:150px; }
+    .enf-kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+
+  /* Selector Ingreso | Garantía: flota sobre el recuadro de Recepción y no afecta la cuadrícula */
+  #recepcionPanel{ position:relative; }
+  .gar-seg{ position:absolute; top:48px; right:32px; display:inline-flex; padding:2px; border:1px solid var(--border); border-radius:100px; background:var(--bg); }
+  .gar-seg button{ display:inline-flex; align-items:center; gap:6px; padding:2px 12px; border:none; border-radius:100px; background:transparent; color:var(--text-muted); font:600 12.5px 'Inter',sans-serif; line-height:normal; cursor:pointer; transition:color .15s, background .15s; }
+  .gar-seg button.is-on{ background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(232,32,63,.3); }
+  .gar-seg button:not(.is-on):hover{ color:var(--text); }
+  @media (max-width:480px){ .gar-seg{ position:static; align-self:flex-start; } }
+
+  /* ===== Garantía: buscador de ID + estado del recuadro de Recepción ===== */
+  #garantiaModal{ background:rgba(8,8,12,.28); backdrop-filter:none; -webkit-backdrop-filter:none; }
+  /* mismas 6 columnas que la cuadrícula de datos: el buscador mide lo mismo que el campo Descripción de la falla (2 columnas) */
+  .gar-search{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px 12px; margin-bottom:18px; }
+  .gar-search > *{ grid-column:1 / span 2; }
+  @media (max-width:760px){ .gar-search{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .gar-inwrap{ position:relative; }
+  .gar-inwrap svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none; }
+  #garInput{ width:100%; box-sizing:border-box; height:36px; padding:0 12px 0 38px; border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--text); font:13px 'Inter',sans-serif; transition:border-color .15s ease, box-shadow .15s ease; }
+  #garInput:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,32,63,.15); }
+  .gar-list{ position:absolute; z-index:10; left:0; width:420px; max-width:calc(100vw - 80px); top:calc(100% + 6px); max-height:240px; overflow:auto; padding:4px; border:1px solid var(--border); border-radius:10px; background:var(--surface); box-shadow:0 14px 34px rgba(0,0,0,.25); }
+  .gar-list[hidden]{ display:none; }
+  .gar-opt{ display:grid; grid-template-columns:96px minmax(0,1fr) auto; gap:10px; align-items:center; width:100%; padding:8px 10px; border:none; border-radius:8px; background:transparent; color:var(--text); font:13px 'Inter',sans-serif; text-align:left; cursor:pointer; }
+  .gar-opt:hover, .gar-opt.is-hi{ background:var(--bg); }
+  .gar-opt span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-muted); }
+  .gar-opt em{ font-style:normal; font-size:11px; color:var(--text-muted); }
+  .gar-none{ padding:12px; font-size:12.5px; text-align:center; color:var(--text-muted); }
+  .gar-box .enf-bar{ margin-top:20px; }
+  #recepcionPanel .f-field input:disabled{ cursor:not-allowed; opacity:1; color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 12%, var(--bg)); }
+
+  /* Equipos recibidos: buscador y paginación */
+  .eq-search{ position:relative; margin-top:12px; max-width:340px; }
+  .eq-search svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none; }
+  #eqSearch{ width:100%; box-sizing:border-box; height:36px; padding:0 12px 0 36px; border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--text); font:13px 'Inter',sans-serif; }
+  #eqSearch:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,32,63,.15); }
+  .eq-pager{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted); }
+  .eq-pager:empty{ display:none; }
+  .eq-pager b{ color:var(--text); }
+  .eq-pg{ display:flex; align-items:center; gap:4px; }
+  .eq-pg button{ min-width:30px; height:30px; padding:0 9px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text-muted); font:600 12px 'Inter',sans-serif; cursor:pointer; }
+  .eq-pg button:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
+  .eq-pg button.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .eq-pg button:disabled{ opacity:.4; cursor:not-allowed; }
+  .eq-pg > span{ display:grid; place-items:center; min-width:20px; }
+
+
+  /* Ajustes: tablas maestras */
+  .panel-form{ align-items:stretch; }
+  .panel-form h2{ margin-bottom:18px; }
+  .view[hidden]{ display:none; }
+  .top-icon.is-link{ cursor:pointer; }
+  .ajustes-grid{ --ctl-h:36px; --row-h:36px; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; align-items:stretch; }
+  .cat-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:12px; min-width:0; }
+  .cat-card h3{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; margin:0; height:24px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .cat-count{ font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; color:var(--text-muted); background:var(--bg); border:1px solid var(--border); border-radius:100px; padding:2px 9px; }
+  .cat-form{ display:flex; flex-direction:column; gap:8px; }
+  .cat-split{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .cat-form input, .cat-form select{ width:100%; min-width:0; height:var(--ctl-h); font-family:'Inter',sans-serif; font-size:13px; color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:0 10px; }
+  .cat-form input:focus, .cat-form select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,32,63,.15); }
+  .cat-form select.is-empty{ color:var(--text-muted); color:color-mix(in srgb, var(--text-muted) 75%, transparent); }
+  .cat-form select option{ color:var(--text); }
+  .cat-form select option[value=""]{ color:var(--text-muted); }
+  .cat-form input::placeholder{ color:var(--text-muted); opacity:.75; }
+  .cat-form .cat-err{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(232,32,63,.18); }
+  .cat-form button{ height:var(--ctl-h); border:none; border-radius:9px; padding:0 12px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; font-weight:600; font-size:13px; cursor:pointer; }
+  .cat-form button:hover{ filter:brightness(1.06); }
+  .cat-list, .cat-groups{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .cat-list li, details.grp > summary, .mrow{ height:var(--row-h); display:flex; align-items:center; gap:8px; padding:0 10px; font-size:13px; border-bottom:1px solid var(--border); }
+  .cat-list li > span:first-child, .mrow > span:first-child, details.grp > summary .t{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cat-list li:last-child{ border-bottom:none; }
+  .cat-groups > details:last-child > :last-child{ border-bottom:none; }
+  .cat-list .cat-empty, .cat-groups .cat-empty{ justify-content:center; color:var(--text-muted); font-size:12.5px; }
+  .cat-groups .cat-empty{ display:flex; align-items:center; height:var(--row-h); }
+  details.grp > summary{ list-style:none; cursor:pointer; font-weight:600; background:var(--bg); }
+  details.grp > summary::-webkit-details-marker{ display:none; }
+  details.grp > summary::before{ content:"▸"; color:var(--accent); transition:transform .12s; }
+  details.grp[open] > summary::before{ transform:rotate(90deg); }
+  details.grp > summary .n{ font-size:11px; color:var(--text-muted); font-weight:600; }
+  .mrow{ padding-left:26px; }
+  .cat-del{ flex:none; width:26px; height:26px; border:1px solid var(--border); background:transparent; color:var(--text-muted); border-radius:7px; cursor:pointer; font-size:15px; line-height:1; }
+  .cat-del:hover{ color:var(--accent); border-color:var(--accent); }
+  .cat-edit{ flex:none; width:26px; height:26px; padding:0; border:1px solid var(--border); background:transparent; color:var(--text-muted); border-radius:7px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+  .cat-edit:hover, .cat-edit.is-save{ color:var(--accent); border-color:var(--accent); }
+  .cat-del svg, .cat-edit svg{ display:block; }
+  .cat-edit-in{ flex:1; min-width:0; height:26px; font-family:'Inter',sans-serif; font-size:13px; color:var(--text); background:var(--bg); border:1px solid var(--accent); border-radius:7px; padding:0 8px; }
+  .cat-edit-in:focus{ outline:none; box-shadow:0 0 0 3px rgba(232,32,63,.15); }
+  .cat-edit-in.cat-err{ box-shadow:0 0 0 3px rgba(232,32,63,.3); }
+  @media (max-width:1000px){ .ajustes-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  @media (max-width:560px){ .ajustes-grid{ grid-template-columns:1fr; } }
+
+  /* Confirmación para eliminar */
+  @keyframes dpIn{ from{ opacity:0; transform:translateY(-4px);} to{ opacity:1; transform:none;} }
+  .cm-overlay{ position:fixed; inset:0; z-index:300; background:rgba(8,8,12,.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:20px; }
+  .cm-overlay[hidden]{ display:none; }
+  .cm-box{ width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:26px 24px 22px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.4); animation:dpIn .15s ease; }
+  .cm-ico{ width:48px; height:48px; margin:0 auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent); background:rgba(232,32,63,.12); }
+  .cm-box h3{ font-family:'Space Grotesk',sans-serif; font-size:18px; margin:0 0 8px; }
+  .cm-box p{ margin:0 0 20px; font-size:13.5px; line-height:1.55; color:var(--text-muted); }
+  .cm-box p strong{ color:var(--text); }
+  .cm-actions{ display:flex; gap:10px; }
+  .cm-actions button{ flex:1; border-radius:10px; padding:10px 12px; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; }
+  .cm-cancel{ background:var(--bg); color:var(--text); border:1px solid var(--border); }
+  .cm-cancel:hover{ border-color:var(--text-muted); }
+  .cm-ok{ background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:none; }
+  .cm-ok:hover{ filter:brightness(1.07); }
+
+  /* Las píldoras de subtítulo ocupan solo el ancho de su texto */
+  .panel > .tag{ align-self:flex-start; }
+  /* Los recuadros del panel técnico y de Garantía son anchos (el estilo base de confirmación es de 380 px) */
+  .cm-box.enf-box{ max-width:960px; }
+  .cm-box.enf-box.gar-box{ max-width:1000px; }
+
+  @media (max-width:720px){
+    #topbar{ padding-left:16px; padding-right:10px; }
+    main{ padding:24px 18px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand-text">Servicio&nbsp;Técnico</div>
+
+  <nav class="top-icons" aria-label="Módulos">
+    <span class="top-icon active is-link" id="navDashboard" title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+    <span class="top-icon is-link" id="navRecepcion" title="Recepción"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8a2 2 0 0 1 2 2v14H6V6a2 2 0 0 1 2-2z"/><path d="M9.5 4V3h5v1"/><path d="M9 10h6M9 14h6M9 17h3"/></svg></span>
+    <span class="top-icon is-link" id="navTecnico" title="Técnico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg></span>
+    <span class="top-icon" title="Ventas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/><path d="M3 12h18"/></svg></span>
+    <span class="top-icon" title="Inventario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
+    <span class="top-icon" title="Garantías"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6l7-3z"/><path d="M9.5 12.2l1.8 1.8 3.2-3.6"/></svg></span>
+    <span class="top-icon" title="Caja"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M6 6V4h12v2"/></svg></span>
+    <span class="top-icon" title="Finanzas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V9M9 21V3M15 21v-7M21 21V6"/></svg></span>
+    <span class="top-icon" title="Contactos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8.5" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="17.5" cy="7.5" r="2.4"/><path d="M15.7 13.6c2.5.4 4.3 2.4 4.3 5.4"/></svg></span>
+    <span class="top-icon is-link" id="navAjustes" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.4-2-3.4-2.3.8a7.7 7.7 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.7 7.7 0 0 0-2.6 1.5l-2.3-.8-2 3.4 2 1.4a7.6 7.6 0 0 0 0 3l-2 1.4 2 3.4 2.3-.8a7.7 7.7 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.7 7.7 0 0 0 2.6-1.5l2.3.8 2-3.4-2-1.4z"/></svg></span>
+  </nav>
+</header>
+
+<main>
+  <div class="page-head">
+    <p class="eyebrow" id="crumbNum">Vista principal interactiva con métricas clave (KPIs) en tiempo real para la toma de decisiones rápidas.</p>
+    <h1 id="pageTitle">Dashboard General</h1>
+  </div>
+
+  <div class="panel view" id="dashPanel">
+    <div class="tag"><span class="dot"></span>En construcción</div>
+    <h2>Dashboard</h2>
+    <p>Este módulo está en construcción.</p>
+  </div>
+
+  <!-- Panel Recepción: ingreso de equipos -->
+  <div class="panel panel-form view" id="recepcionPanel" hidden>
+    <div class="tag"><span class="dot"></span>Recepción de equipos</div>
+    <h2>Registro de ingreso al taller</h2>
+    <div class="gar-seg" role="group" aria-label="Tipo de registro"><button type="button" class="is-on" aria-pressed="true">Ingreso</button><button type="button" id="btnGarantia" aria-pressed="false">Garantía</button></div>
+    <form id="recepcionForm" class="recepcion-grid" onsubmit="event.preventDefault();">
+      <div class="f-field">
+        <label for="rf-fecha">Recepción *</label>
+        <div class="dp-wrap" id="dpWrap">
+          <input type="text" id="rf-fecha" class="dp-input" readonly placeholder="dd/mm/aaaa" autocomplete="off" aria-haspopup="dialog" aria-expanded="false">
+          <svg class="dp-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          <div class="dp-pop" id="dpPop" role="dialog" aria-label="Calendario" hidden></div>
+        </div>
+      </div>
+      <div class="f-field">
+        <label for="rf-cliente">Cliente *</label>
+        <input type="text" id="rf-cliente" placeholder="Nombre y apellido" required>
+      </div>
+      <div class="f-field">
+        <label for="rf-telefono">Teléfono / WhatsApp *</label>
+        <input type="tel" id="rf-telefono" inputmode="numeric" autocomplete="tel-national" placeholder="4xx 123 4567" required>
+      </div>
+      <div class="f-field">
+        <label for="rf-categoria">Categoría *</label>
+        <select id="rf-categoria" class="is-empty" required>
+          <option value="">Seleccionar</option>
+          <option>Consola</option>
+          <option>Laptop</option>
+          <option>PC Escritorio</option>
+          <option>Mando / Control</option>
+          <option>Otro periférico</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="rf-modelo">Modelo / Equipo *</label>
+        <select id="rf-modelo" class="is-empty" required disabled>
+          <option value="">Seleccione categoría</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="rf-serial">Serial / ID *</label>
+        <input type="text" id="rf-serial" placeholder="Serial o ID del equipo" required>
+      </div>
+      <div class="f-field f-span2">
+        <label for="rf-falla">Descripción de la falla *</label>
+        <div class="ph-wrap">
+          <input type="text" id="rf-falla" maxlength="50" placeholder=" " autocomplete="off" required>
+          <span class="ph-fake" aria-hidden="true"><span class="ph-t">Detalle breve reportado por el cliente</span><span class="ph-max">(máx. 50 caracteres)</span></span>
+        </div>
+      </div>
+      <div class="f-field">
+        <label for="rf-tecnico">Técnico *</label>
+        <select id="rf-tecnico" class="is-empty" required>
+          <option value="">Seleccionar</option>
+          <option>Alex T. — Consolas</option>
+          <option>Mariano R. — Soldadura</option>
+          <option>David L. — Laptops / PC</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="rf-costo">Monto ($) *</label>
+        <input type="text" id="rf-costo" class="monto-input" inputmode="numeric" autocomplete="off" placeholder="0,00" required>
+      </div>
+      <div class="f-field">
+        <label for="rf-entrega">Entrega Estimada *</label>
+        <div class="dp-wrap dp-right" id="dpWrap2">
+          <input type="text" id="rf-entrega" class="dp-input" readonly placeholder="dd/mm/aaaa" autocomplete="off" aria-haspopup="dialog" aria-expanded="false">
+          <svg class="dp-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          <div class="dp-pop" id="dpPop2" role="dialog" aria-label="Calendario" hidden></div>
+        </div>
+      </div>
+      <div class="f-field f-submit">
+        <button type="submit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Registrar ingreso</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Panel Equipos recibidos: tabla bajo el recuadro de Recepción -->
+  <div class="panel panel-form view" id="equiposPanel" hidden>
+    <div class="tag"><span class="dot"></span>Equipos recibidos</div>
+    <div class="eq-head"><h2>Equipos recibidos en taller</h2><span class="eq-count" id="eqCount">0 órdenes</span></div>
+    <div class="eq-chips" id="eqChips"></div>
+    <div class="eq-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" id="eqSearch" placeholder="Buscar por ID, cliente o equipo…" autocomplete="off" aria-label="Buscar equipos"></div>
+    <div class="eq-tbl"><div class="eq-in" id="eqTable"></div></div>
+    <div class="eq-pager" id="eqPager"></div>
+  </div>
+
+  <!-- Ajustes: tablas maestras -->
+  <div class="panel panel-form view" id="ajustesPanel" hidden>
+    <div class="tag"><span class="dot"></span>Tablas maestras</div>
+    <h2>Listas desplegables del sistema</h2>
+    <div class="ajustes-grid">
+      <section class="cat-card" data-cat="tecnicos" data-singular="técnico" data-title="Técnicos">
+        <h3>Técnicos <span class="cat-count"></span></h3>
+        <div class="cat-form"><input type="text" placeholder="Nombre del técnico" maxlength="60"><button type="button">Agregar</button></div>
+        <ul class="cat-list"></ul>
+      </section>
+      <section class="cat-card" data-cat="categorias" data-singular="categoría" data-title="Categorías">
+        <h3>Categorías <span class="cat-count"></span></h3>
+        <div class="cat-form"><input type="text" placeholder="Categoría" maxlength="60"><button type="button">Agregar</button></div>
+        <ul class="cat-list"></ul>
+      </section>
+      <section class="cat-card" data-cat="modelos" data-singular="modelo / equipo" data-title="Modelos / Equipos">
+        <h3>Modelos / Equipos <span class="cat-count"></span></h3>
+        <div class="cat-form">
+          <div class="cat-split">
+            <select id="mod-cat" class="is-empty" aria-label="Categoría"><option value="">Categoría</option></select>
+            <input type="text" placeholder="Modelo o equipo" maxlength="80">
+          </div>
+          <button type="button" class="cat-add">Agregar</button>
+        </div>
+        <div class="cat-groups"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+  <!-- Ticket de recepción -->
+  <div class="cm-overlay" id="ticketModal" hidden>
+    <div class="cm-box eq-ticket" role="dialog" aria-modal="true" aria-labelledby="tkTitle">
+      <h3 id="tkTitle">Comprobante de recepción</h3>
+      <dl id="tkBody"></dl>
+      <div class="cm-actions">
+        <button type="button" class="cm-cancel" id="tkClose">Cerrar</button>
+        <button type="button" class="cm-ok" id="tkPrint">Imprimir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Técnico: pantalla sobrepuesta (contenido por definir) -->
+  <div class="cm-overlay" id="enfoqueModal" hidden>
+    <div class="cm-box enf-box" role="dialog" aria-modal="true" aria-label="Panel técnico">
+      <button type="button" class="enf-x" id="enfClose" aria-label="Cerrar">&times;</button>
+      <div id="enfBody"></div>
+    </div>
+  </div>
+
+  <div class="cm-overlay" id="garantiaModal" hidden>
+    <div class="cm-box enf-box gar-box" role="dialog" aria-modal="true" aria-label="Garantía: buscador de ID" style="--c:var(--accent)">
+      <button type="button" class="enf-x" id="garClose" aria-label="Cerrar">&times;</button>
+      <div class="gar-search">
+        <label class="enf-kl" for="garInput">Buscador de ID</label>
+        <div class="gar-inwrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="text" id="garInput" placeholder="Escribe el ID del equipo, ej. R-0005" autocomplete="off" aria-label="Buscador de ID">
+          <div class="gar-list" id="garList" hidden></div>
+        </div>
+      </div>
+      <div id="garInfo"></div>
+      <div class="enf-bar"><div class="enf-acts"><button type="button" class="enf-btn is-save" id="garSelect" disabled>Seleccionar</button></div></div>
+    </div>
+  </div>
+
+  <!-- Confirmación para eliminar registros de Ajustes -->
+  <div class="cm-overlay" id="confirmModal" hidden>
+    <div class="cm-box" role="alertdialog" aria-modal="true" aria-labelledby="cmTitle" aria-describedby="cmText">
+      <div class="cm-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg></div>
+      <h3 id="cmTitle">Eliminar registro</h3>
+      <p id="cmText"></p>
+      <div class="cm-actions">
+        <button type="button" class="cm-cancel" id="cmCancel">Cancelar</button>
+        <button type="button" class="cm-ok" id="cmOk">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---- Navegación del cintillo: Dashboard, Recepción, Técnico y Ajustes tienen función; el resto de íconos son estáticos ----
+  const VIEWS = {
+    dashboard: { nav:'navDashboard', title:'Dashboard General', desc:'Vista principal interactiva con métricas clave (KPIs) en tiempo real para la toma de decisiones rápidas.', panels:['dashPanel'] },
+    recepcion: { nav:'navRecepcion', title:'Recepción', desc:'Registro del ingreso de equipos al taller: datos del cliente, falla reportada y técnico asignado.', panels:['recepcionPanel','equiposPanel'] },
+    tecnico:   { nav:'navTecnico',   title:'Técnico', desc:'Seguimiento de los equipos recibidos en el taller: diagnóstico, notas del técnico y repuestos.', panels:['equiposPanel'] },
+    ajustes:   { nav:'navAjustes',   title:'Ajustes', desc:'Parámetros globales del sistema, reglas de acceso y auditoría interna.', panels:['ajustesPanel'] }
+  };
+  function showView(key){
+    const v = VIEWS[key];
+    ['dashPanel','recepcionPanel','equiposPanel','ajustesPanel'].forEach(id => { document.getElementById(id).hidden = !v.panels.includes(id); });
+    document.getElementById('pageTitle').textContent = v.title;
+    document.getElementById('crumbNum').textContent = v.desc;
+    document.querySelectorAll('.top-icon').forEach(x => x.classList.remove('active'));
+    document.getElementById(v.nav).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  Object.keys(VIEWS).forEach(k => document.getElementById(VIEWS[k].nav).addEventListener('click', () => showView(k)));
+
+  // ---- Tablas maestras (Ajustes): arrancan sin contenido ----
+  let catalogs = { tecnicos:[], categorias:[], modelos:[] };
+  try {
+    const saved = JSON.parse(localStorage.getItem('st_catalogs') || 'null');
+    if (saved && saved.tecnicos && saved.categorias && saved.modelos) catalogs = saved;
+  } catch(e) {}
+  function saveCatalogs(){ try { localStorage.setItem('st_catalogs', JSON.stringify(catalogs)); } catch(e) {} }
+
+  const catLabel = (key, it) => it.nombre;
+  const selectFor = { tecnicos:'rf-tecnico', categorias:'rf-categoria', modelos:'rf-modelo' };
+
+  // marca en gris (clase is-empty) las listas que muestran su texto de ayuda («Seleccionar», «Sin asignar»…)
+  function syncEmpty(sel){ sel.classList.toggle('is-empty', !sel.value); }
+  function renderSelect(key){
+    if (key === 'modelos'){ renderModeloSelect(); return; }
+    if (!selectFor[key]) return;
+    const sel = document.getElementById(selectFor[key]);
+    const current = sel.value;
+    const placeholder = sel.options[0] ? sel.options[0].cloneNode(true) : new Option('Seleccionar','');
+    sel.innerHTML = '';
+    sel.appendChild(placeholder);
+    catalogs[key].forEach(it => { const label = catLabel(key, it); sel.appendChild(new Option(label, label)); });
+    sel.value = current;
+    if (sel.value !== current) sel.value = '';
+    syncEmpty(sel);
+    if (key === 'categorias'){ renderModCatSelect(); renderModelosCard(); renderModeloSelect(); }
+  }
+
+  // Lista «Modelo / Equipo» de Recepción: muestra solo los modelos de la categoría elegida
+  function renderModeloSelect(){
+    const sel = document.getElementById('rf-modelo');
+    const cat = document.getElementById('rf-categoria').value;
+    const current = sel.value;
+    sel.innerHTML = '';
+    if (!cat){
+      sel.disabled = true;
+      sel.appendChild(new Option('Seleccione categoría', ''));
+    } else {
+      const list = catalogs.modelos.filter(m => m.cat === cat);
+      sel.disabled = false;
+      sel.appendChild(new Option(list.length ? 'Seleccionar' : 'Sin modelos en esta categoría', ''));
+      list.forEach(m => sel.appendChild(new Option(m.nombre, m.nombre)));
+    }
+    sel.value = current;
+    if (sel.value !== current) sel.value = '';
+    syncEmpty(sel);
+  }
+  document.getElementById('rf-categoria').addEventListener('change', renderModeloSelect);
+  document.querySelectorAll('#recepcionPanel select').forEach(sel => { sel.addEventListener('change', () => syncEmpty(sel)); syncEmpty(sel); });
+
+  // Ajustes › Modelos / Equipos: selector de categoría y lista agrupada (borrador B)
+  const modCat = document.getElementById('mod-cat');
+  function renderModCatSelect(){
+    const current = modCat.value;
+    modCat.innerHTML = '';
+    modCat.appendChild(new Option('Categoría', ''));
+    catalogs.categorias.forEach(c => modCat.appendChild(new Option(c.nombre, c.nombre)));
+    modCat.value = current;
+    if (modCat.value !== current) modCat.value = '';
+    syncEmpty(modCat);
+  }
+  const groupOpen = {};   // nombre de categoría → abierta/cerrada (por defecto plegada)
+  function renderModelosCard(){
+    const card = document.querySelector('.cat-card[data-cat="modelos"]');
+    const box = card.querySelector('.cat-groups');
+    box.innerHTML = '';
+    card.querySelector('.cat-count').textContent = catalogs.modelos.length;
+    const names = catalogs.categorias.map(c => c.nombre);
+    const groups = names.slice();
+    if (catalogs.modelos.some(m => !names.includes(m.cat))) groups.push('Sin categoría');
+    if (!groups.length){ const e = document.createElement('span'); e.className = 'cat-empty'; e.textContent = 'Primero crea una categoría'; box.appendChild(e); return; }
+    groups.forEach(g => {
+      const items = [];
+      catalogs.modelos.forEach((m, idx) => { if (g === 'Sin categoría' ? !names.includes(m.cat) : m.cat === g) items.push({ m, idx }); });
+      const det = document.createElement('details'); det.className = 'grp';
+      det.open = groupOpen[g] === true;   // por defecto plegadas
+      const sum = document.createElement('summary');
+      const t = document.createElement('span'); t.className = 't'; t.textContent = g; t.title = g;
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = items.length;
+      sum.appendChild(t); sum.appendChild(n); det.appendChild(sum);
+      items.forEach(({ m, idx }) => {
+        const row = document.createElement('div'); row.className = 'mrow';
+        const txt = document.createElement('span'); txt.textContent = m.nombre; txt.title = m.nombre;
+        const del = document.createElement('button');
+        del.type = 'button'; del.className = 'cat-del'; del.title = 'Eliminar'; del.setAttribute('aria-label', 'Eliminar ' + m.nombre); del.textContent = '×';
+        del.addEventListener('click', () => {
+          askConfirm('¿Seguro que quieres eliminar <strong></strong> de ' + g + '? Dejará de aparecer en las listas desplegables.', m.nombre, () => {
+            catalogs.modelos.splice(idx, 1); saveCatalogs(); renderModelosCard(); renderModeloSelect();
+          });
+        });
+        const ed = makeEditBtn(m.nombre);
+        ed.addEventListener('click', () => startEdit(row, txt, ed, del, m.nombre, v => {
+          if (catalogs.modelos.some((x, i) => i !== idx && x.cat === m.cat && x.nombre.toLowerCase() === v.toLowerCase())) return false;
+          const old = m.nombre, rf = document.getElementById('rf-modelo');
+          const wasSel = rf.value === old && document.getElementById('rf-categoria').value === m.cat;
+          let touched = false;
+          if (typeof orders !== 'undefined') orders.forEach(o => { if (o.categoria === m.cat && o.modelo === old){ o.modelo = v; touched = true; } });
+          m.nombre = v;
+          groupOpen[g] = true;
+          saveCatalogs(); if (touched) saveOrders();
+          renderModelosCard(); renderModeloSelect();
+          if (wasSel){ rf.value = v; syncEmpty(rf); }
+          if (touched) renderEquipos();
+          return true;
+        }, () => renderModelosCard()));
+        row.appendChild(txt); row.appendChild(ed); row.appendChild(del); det.appendChild(row);
+      });
+      det.addEventListener('toggle', () => { groupOpen[g] = det.open; });
+      box.appendChild(det);
+    });
+  }
+  (function(){
+    const card = document.querySelector('.cat-card[data-cat="modelos"]');
+    const inp = card.querySelector('.cat-split input');
+    const flag = el => { el.classList.add('cat-err'); el.focus(); setTimeout(() => el.classList.remove('cat-err'), 1400); };
+    const add = () => {
+      const cat = modCat.value, nombre = inp.value.trim();
+      if (!cat){ flag(modCat); return; }
+      if (!nombre){ flag(inp); return; }
+      if (catalogs.modelos.some(x => x.cat === cat && x.nombre.toLowerCase() === nombre.toLowerCase())){ flag(inp); return; }
+      catalogs.modelos.push({ cat, nombre });
+      groupOpen[cat] = true;
+      inp.value = '';
+      saveCatalogs(); renderModelosCard(); renderModeloSelect(); inp.focus();
+    };
+    card.querySelector('.cat-add').addEventListener('click', add);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); add(); } });
+    modCat.addEventListener('change', () => { modCat.classList.remove('cat-err'); syncEmpty(modCat); });
+  })();
+
+  // Modal de confirmación para eliminar
+  const cmEl = document.getElementById('confirmModal');
+  let cmAction = null, cmLastFocus = null;
+  function askConfirm(html, name, onOk){
+    const p = document.getElementById('cmText');
+    p.innerHTML = html; p.querySelector('strong').textContent = '«' + name + '»';
+    cmAction = onOk; cmLastFocus = document.activeElement;
+    cmEl.hidden = false; document.getElementById('cmCancel').focus();
+  }
+  function closeConfirm(){ cmEl.hidden = true; cmAction = null; if (cmLastFocus && cmLastFocus.isConnected) { try { cmLastFocus.focus(); } catch(e) {} } }
+  document.getElementById('cmCancel').addEventListener('click', closeConfirm);
+  document.getElementById('cmOk').addEventListener('click', () => { const fn = cmAction; closeConfirm(); if (fn) fn(); });
+
+  // Edición en línea de registros de Ajustes (botón lápiz a la izquierda de eliminar)
+  const ICO_EDIT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+  const ICO_OK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  const ICO_CANCEL = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>';
+  function makeEditBtn(name){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'cat-edit'; b.title = 'Editar'; b.setAttribute('aria-label', 'Editar ' + name); b.innerHTML = ICO_EDIT;
+    return b;
+  }
+  // Convierte el texto de la fila en un campo editable. commit(nuevo) devuelve false si el nombre no es válido (p. ej. repetido).
+  function startEdit(row, txt, ed, del, current, commit, cancel){
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.className = 'cat-edit-in'; inp.value = current; inp.maxLength = 80; inp.setAttribute('aria-label', 'Nuevo nombre');
+    const save = document.createElement('button');
+    save.type = 'button'; save.className = 'cat-edit is-save'; save.title = 'Guardar'; save.setAttribute('aria-label', 'Guardar cambio'); save.innerHTML = ICO_OK;
+    const can = document.createElement('button');
+    can.type = 'button'; can.className = 'cat-del'; can.title = 'Cancelar'; can.setAttribute('aria-label', 'Cancelar edición'); can.innerHTML = ICO_CANCEL;
+    row.replaceChild(inp, txt); row.replaceChild(save, ed); row.replaceChild(can, del);
+    const flag = () => { inp.classList.add('cat-err'); inp.focus(); setTimeout(() => inp.classList.remove('cat-err'), 1400); };
+    const done = () => {
+      const v = inp.value.trim();
+      if (!v){ flag(); return; }
+      if (v === current){ cancel(); return; }
+      if (!commit(v)) flag();
+    };
+    save.addEventListener('click', done);
+    can.addEventListener('click', cancel);
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter'){ e.preventDefault(); done(); }
+      else if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); cancel(); }
+    });
+    inp.focus(); inp.select();
+  }
+  cmEl.addEventListener('mousedown', e => { if (e.target === cmEl) closeConfirm(); });
+  document.addEventListener('keydown', e => { if (!cmEl.hidden && e.key === 'Escape'){ e.stopPropagation(); closeConfirm(); } });
+
+  function renderCatalog(key){
+    const card = document.querySelector('.cat-card[data-cat="' + key + '"]');
+    const ul = card.querySelector('.cat-list');
+    ul.innerHTML = '';
+    card.querySelector('.cat-count').textContent = catalogs[key].length;
+    if (!catalogs[key].length){
+      const li = document.createElement('li'); li.className = 'cat-empty'; li.textContent = 'Sin registros'; ul.appendChild(li);
+    }
+    catalogs[key].forEach((it, idx) => {
+      const li = document.createElement('li');
+      const txt = document.createElement('span');
+      txt.textContent = it.nombre; txt.title = it.nombre;
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'cat-del'; del.title = 'Eliminar'; del.setAttribute('aria-label','Eliminar ' + it.nombre); del.textContent = '×';
+      del.addEventListener('click', () => {
+        const title = card.dataset.title || 'la tabla';
+        const ligados = key === 'categorias' ? catalogs.modelos.filter(m => m.cat === it.nombre).length : 0;
+        const aviso = ligados ? ' También se eliminarán sus ' + ligados + (ligados === 1 ? ' modelo / equipo.' : ' modelos / equipos.') : ' Dejará de aparecer en las listas desplegables.';
+        askConfirm('¿Seguro que quieres eliminar <strong></strong> de ' + title + '?' + aviso, it.nombre, () => {
+          if (ligados) catalogs.modelos = catalogs.modelos.filter(m => m.cat !== it.nombre);
+          catalogs[key].splice(idx, 1); saveCatalogs(); renderCatalog(key); renderSelect(key);
+        });
+      });
+      const ed = makeEditBtn(it.nombre);
+      ed.addEventListener('click', () => startEdit(li, txt, ed, del, it.nombre, v => {
+        if (catalogs[key].some((x, i) => i !== idx && x.nombre.toLowerCase() === v.toLowerCase())) return false;
+        const old = it.nombre;
+        const sel = selectFor[key] && selectFor[key] !== 'rf-modelo' ? document.getElementById(selectFor[key]) : null;
+        const wasSel = sel && sel.value === old;
+        it.nombre = v;
+        let touched = false;
+        if (key === 'categorias') catalogs.modelos.forEach(m => { if (m.cat === old) m.cat = v; });
+        if (typeof orders !== 'undefined') orders.forEach(o => {
+          if (key === 'tecnicos' && o.tecnico === old){ o.tecnico = v; touched = true; }
+          if (key === 'categorias' && o.categoria === old){ o.categoria = v; touched = true; }
+        });
+        saveCatalogs(); if (touched) saveOrders();
+        renderCatalog(key);
+        if (wasSel){ sel.value = v; syncEmpty(sel); if (key === 'categorias') renderModeloSelect(); }
+        if (touched) renderEquipos();
+        return true;
+      }, () => renderCatalog(key)));
+      li.appendChild(txt); li.appendChild(ed); li.appendChild(del); ul.appendChild(li);
+    });
+    renderSelect(key);
+  }
+
+  document.querySelectorAll('.cat-card:not([data-cat="modelos"])').forEach(card => {
+    const key = card.dataset.cat;
+    const nameInput = card.querySelector('.cat-form input');
+    const add = () => {
+      const nombre = nameInput.value.trim();
+      if (!nombre) { nameInput.focus(); return; }
+      if (catalogs[key].some(x => x.nombre.toLowerCase() === nombre.toLowerCase())) { nameInput.focus(); return; }
+      const item = { nombre };
+      catalogs[key].push(item);
+      nameInput.value = '';
+      saveCatalogs(); renderCatalog(key); nameInput.focus();
+    };
+    card.querySelector('.cat-form button').addEventListener('click', add);
+    card.querySelectorAll('.cat-form input').forEach(inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); add(); } }));
+    renderCatalog(key);
+  });
+  renderModCatSelect(); renderModelosCard(); renderModeloSelect();
+
+  // ---- Campo Monto: llenado tipo cajero (los dígitos entran por la derecha), 2 decimales, solo números ----
+  (function(){
+    const inp = document.getElementById('rf-costo');
+    const MAX_DIGITS = 11;
+    function format(){
+      let d = inp.value.replace(/\D/g,'').replace(/^0+/, '').slice(0, MAX_DIGITS);
+      if (!d){ inp.value = ''; return; }
+      d = d.padStart(3,'0');
+      inp.value = d.slice(0,-2) + ',' + d.slice(-2);
+    }
+    const toEnd = () => { const n = inp.value.length; try { inp.setSelectionRange(n, n); } catch(e) {} };
+    inp.addEventListener('input', () => { format(); toEnd(); });
+    inp.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) return;   // teclas de control permitidas
+      if (!/^[0-9]$/.test(e.key)) e.preventDefault();                       // bloquea -, +, e, punto, coma, letras, etc.
+    });
+    ['focus','click','keyup','select'].forEach(ev => inp.addEventListener(ev, () => setTimeout(toEnd, 0)));
+  })();
+
+  // ---- Campo Teléfono / WhatsApp: formato 412 123 4567 (10 dígitos, empieza por 4, solo números) ----
+  (function(){
+    const inp = document.getElementById('rf-telefono');
+    const fmt = d => [d.slice(0,3), d.slice(3,6), d.slice(6,10)].filter(Boolean).join(' ');
+    inp.addEventListener('input', () => {
+      const pos = inp.selectionStart == null ? inp.value.length : inp.selectionStart;
+      const raw = inp.value.replace(/\D/g,'');
+      const lead = raw.match(/^[^4]*/)[0].length;                    // el primer dígito debe ser 4: se descarta lo que haya antes
+      const digitsBefore = Math.max(0, inp.value.slice(0, pos).replace(/\D/g,'').length - lead);
+      const d = raw.slice(lead, lead + 10);
+      inp.value = fmt(d);
+      // conserva la posición del cursor (contando solo dígitos)
+      let n = Math.min(digitsBefore, d.length), p = 0, seen = 0;
+      while (p < inp.value.length && seen < n){ if (/\d/.test(inp.value[p])) seen++; p++; }
+      try { inp.setSelectionRange(p, p); } catch(e) {}
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) return;
+      if (!/^[0-9]$/.test(e.key)) { e.preventDefault(); return; }
+      if (inp.selectionStart === 0 && e.key !== '4') e.preventDefault();   // el primer número solo puede ser 4
+    });
+  })();
+
+  // ---- Calendario personalizado para el campo Fecha ----
+  function initDatePicker(inputId, wrapId, popId){
+    const input = document.getElementById(inputId);
+    const wrap = document.getElementById(wrapId);
+    const pop = document.getElementById(popId);
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    const chevL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+    const chevR = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+    const pad = n => String(n).padStart(2,'0');
+    const iso = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    const same = (a,b) => a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+
+    let selected = null;          // Date | null
+    let view = new Date();        // mes/año que se muestra
+    view.setDate(1);
+    let mode = 'days';            // 'days' | 'months' | 'years'
+    let yearBase = 0;
+
+    function setValue(d){
+      selected = d;
+      input.value = d ? pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear() : '';
+      input.dataset.iso = d ? iso(d) : '';
+    }
+
+    function open(){
+      if (selected) { view = new Date(selected.getFullYear(), selected.getMonth(), 1); }
+      mode = 'days'; render();
+      pop.hidden = false; wrap.classList.add('open'); input.setAttribute('aria-expanded','true');
+    }
+    function close(){ pop.hidden = true; wrap.classList.remove('open'); input.setAttribute('aria-expanded','false'); }
+
+    function render(){
+      const today = new Date();
+      let head = '', body = '';
+      if (mode === 'days'){
+        head = '<button type="button" class="dp-nav" data-a="prev" aria-label="Mes anterior">'+chevL+'</button>'
+             + '<button type="button" class="dp-title" data-a="months">'+MESES[view.getMonth()]+' '+view.getFullYear()+'</button>'
+             + '<button type="button" class="dp-nav" data-a="next" aria-label="Mes siguiente">'+chevR+'</button>';
+        const first = new Date(view.getFullYear(), view.getMonth(), 1);
+        const offset = (first.getDay() + 6) % 7;            // semana inicia en lunes
+        const start = new Date(view.getFullYear(), view.getMonth(), 1 - offset);
+        let cells = '';
+        for (let i = 0; i < 42; i++){
+          const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+          const cls = ['dp-day'];
+          if (d.getMonth() !== view.getMonth()) cls.push('out');
+          if (i % 7 >= 5) cls.push('wknd');
+          if (same(d, today)) cls.push('today');
+          if (same(d, selected)) cls.push('sel');
+          cells += '<button type="button" class="'+cls.join(' ')+'" data-d="'+iso(d)+'">'+d.getDate()+'</button>';
+        }
+        body = '<div class="dp-week">'+DIAS.map(x=>'<span>'+x+'</span>').join('')+'</div><div class="dp-days">'+cells+'</div>';
+      } else if (mode === 'months'){
+        head = '<button type="button" class="dp-nav" data-a="prevY" aria-label="Año anterior">'+chevL+'</button>'
+             + '<button type="button" class="dp-title" data-a="years">'+view.getFullYear()+'</button>'
+             + '<button type="button" class="dp-nav" data-a="nextY" aria-label="Año siguiente">'+chevR+'</button>';
+        body = '<div class="dp-grid">'+MESES.map((m,i)=>{
+          const cls = ['dp-cell'];
+          if (selected && selected.getFullYear()===view.getFullYear() && selected.getMonth()===i) cls.push('sel');
+          else if (today.getFullYear()===view.getFullYear() && today.getMonth()===i) cls.push('cur');
+          return '<button type="button" class="'+cls.join(' ')+'" data-m="'+i+'" style="text-transform:capitalize">'+m.slice(0,3)+'</button>';
+        }).join('')+'</div>';
+      } else {
+        yearBase = yearBase || (Math.floor(view.getFullYear()/12)*12);
+        head = '<button type="button" class="dp-nav" data-a="prevR" aria-label="Años anteriores">'+chevL+'</button>'
+             + '<span class="dp-title" style="cursor:default">'+yearBase+' – '+(yearBase+11)+'</span>'
+             + '<button type="button" class="dp-nav" data-a="nextR" aria-label="Años siguientes">'+chevR+'</button>';
+        let cells = '';
+        for (let y = yearBase; y < yearBase + 12; y++){
+          const cls = ['dp-cell'];
+          if (selected && selected.getFullYear()===y) cls.push('sel');
+          else if (today.getFullYear()===y) cls.push('cur');
+          cells += '<button type="button" class="'+cls.join(' ')+'" data-y="'+y+'">'+y+'</button>';
+        }
+        body = '<div class="dp-grid">'+cells+'</div>';
+      }
+      pop.innerHTML = '<div class="dp-head">'+head+'</div><div class="dp-body">'+body+'</div>'
+        + '<div class="dp-foot"><button type="button" class="dp-clear" data-a="clear">Borrar</button><button type="button" class="dp-today" data-a="today">Hoy</button></div>';
+    }
+
+    pop.addEventListener('click', e => {
+      const t = e.target.closest('button'); if (!t) return;
+      if (t.dataset.d){ const [y,m,d] = t.dataset.d.split('-').map(Number); setValue(new Date(y,m-1,d)); close(); return; }
+      if (t.dataset.m){ view = new Date(view.getFullYear(), Number(t.dataset.m), 1); mode = 'days'; render(); return; }
+      if (t.dataset.y){ view = new Date(Number(t.dataset.y), view.getMonth(), 1); mode = 'months'; yearBase = 0; render(); return; }
+      switch (t.dataset.a){
+        case 'prev':  view = new Date(view.getFullYear(), view.getMonth()-1, 1); break;
+        case 'next':  view = new Date(view.getFullYear(), view.getMonth()+1, 1); break;
+        case 'prevY': view = new Date(view.getFullYear()-1, view.getMonth(), 1); break;
+        case 'nextY': view = new Date(view.getFullYear()+1, view.getMonth(), 1); break;
+        case 'prevR': yearBase -= 12; break;
+        case 'nextR': yearBase += 12; break;
+        case 'months': mode = 'months'; break;
+        case 'years': mode = 'years'; yearBase = Math.floor(view.getFullYear()/12)*12; break;
+        case 'today': { const n = new Date(); setValue(new Date(n.getFullYear(), n.getMonth(), n.getDate())); close(); return; }
+        case 'clear': setValue(null); close(); return;
+      }
+      render();
+    });
+
+    input._clear = () => setValue(null);
+    input.addEventListener('click', () => pop.hidden ? open() : close());
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); if (pop.hidden) open(); }
+      else if (e.key === 'Escape') close();
+      else if (e.key === 'Backspace' || e.key === 'Delete'){ e.preventDefault(); setValue(null); }
+    });
+    document.addEventListener('mousedown', e => { if (!pop.hidden && !wrap.contains(e.target)) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden){ close(); input.focus(); } });
+  }
+  initDatePicker('rf-fecha', 'dpWrap', 'dpPop');
+  initDatePicker('rf-entrega', 'dpWrap2', 'dpPop2');
+  ['dpWrap', 'dpWrap2'].forEach(id => {
+    const w = document.getElementById(id), inp = w.querySelector('input');
+    w.addEventListener('click', () => setTimeout(() => { if (inp.dataset.iso) inp.classList.remove('is-invalid'); }, 0));
+  });
+
+  // ---- Equipos recibidos en taller: se llena con «Registrar ingreso» y se guarda en el navegador ----
+  // Panel Técnico: clave -> color (pendiente de definir)
+  const ENF_PASOS = [['Irreparable', '#4b5563'], ['En Reparación', '#eab308'], ['En Prueba', '#2563eb'], ['Reparado', '#16a34a']]; // 0 gris oscuro, 1 amarillo, 2 azul, 3 verde
+  const ENF_INICIAL = 1; // toda reparación inicia en "En Reparación"
+  const ENF_ICONOS = [
+    '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.7-.7-2.5z"/>',
+    '<path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3"/><path d="M7.5 15h9"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16 9.5"/>'
+  ];
+  const enfNivel = o => (o && ENF_PASOS[o.enfoque]) ? o.enfoque : ENF_INICIAL;
+  const EQ_ESTADOS = [['En Reparación','#4f46e5'], ['Para Entregar','#059669'], ['Entregado','#6b7280'], ['Garantía','#d97706'], ['Devuelto','#dc2626']];
+  let orders = [];
+  try { const o = JSON.parse(localStorage.getItem('st_orders') || 'null'); if (Array.isArray(o)) orders = o; } catch(e) {}
+  const saveOrders = () => { try { localStorage.setItem('st_orders', JSON.stringify(orders)); } catch(e) {} };
+  let eqFiltro = 'Todos';
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pad2 = n => String(n).padStart(2, '0');
+  const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()); };
+  const fmtISO = iso => iso ? iso.split('-').reverse().join('/') : '—';
+  const daysT = o => Math.max(0, Math.round((new Date((o.fechaEnt || todayISO()) + 'T00:00:00') - new Date(o.fechaRec + 'T00:00:00')) / 86400000));
+  const ICO_T = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>';
+  const ICO_W = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.7-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
+
+  // ===== Equipos recibidos: buscador + paginación (10 por página, más recientes primero) =====
+  let eqPag = 1, eqQ = ''; const EQ_PP = 10;
+  const eqFilter = l => { const q = eqQ.trim().toLowerCase(); return q ? l.filter(o => [o.id, o.cliente, o.modelo, o.telefono, o.categoria].join(' ').toLowerCase().includes(q)) : l; };
+  const eqResetView = () => { eqPag = 1; };
+  const eqSlice = l => { const n = Math.max(1, Math.ceil(l.length / EQ_PP)); if (eqPag > n) eqPag = n; return l.slice((eqPag - 1) * EQ_PP, eqPag * EQ_PP); };
+  function eqPages(cur, n){ const a = [...new Set([1, n, cur - 1, cur, cur + 1].filter(p => p >= 1 && p <= n))].sort((x, y) => x - y); const out = []; a.forEach((p, i) => { if (i && p - a[i - 1] > 1) out.push('…'); out.push(p); }); return out; }
+  function eqFooter(full){
+    const total = full.length, n = Math.max(1, Math.ceil(total / EQ_PP));
+    const from = total ? (eqPag - 1) * EQ_PP + 1 : 0, to = Math.min(total, eqPag * EQ_PP);
+    document.getElementById('eqPager').innerHTML = !total ? '' : '<span>Mostrando <b>' + from + '–' + to + '</b> de <b>' + total + '</b></span>'
+      + (n > 1 ? '<div class="eq-pg"><button type="button" data-p="' + (eqPag - 1) + '"' + (eqPag === 1 ? ' disabled' : '') + ' aria-label="Página anterior">‹</button>'
+        + eqPages(eqPag, n).map(p => p === '…' ? '<span>…</span>' : '<button type="button" data-p="' + p + '" class="' + (p === eqPag ? 'on' : '') + '">' + p + '</button>').join('')
+        + '<button type="button" data-p="' + (eqPag + 1) + '"' + (eqPag === n ? ' disabled' : '') + ' aria-label="Página siguiente">›</button></div>' : '');
+  }
+  document.getElementById('eqPager').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b || b.disabled) return; eqPag = parseInt(b.dataset.p, 10); renderEquipos(); });
+  document.getElementById('eqSearch').addEventListener('input', e => { eqQ = e.target.value; eqPag = 1; renderEquipos(); });
+
+  function renderEquipos(){
+    document.getElementById('eqCount').textContent = orders.length + (orders.length === 1 ? ' orden' : ' órdenes');
+    const chips = document.getElementById('eqChips'); chips.innerHTML = '';
+    ['Todos'].concat(EQ_ESTADOS.map(e => e[0])).forEach(name => {
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = 'eq-chip' + (name === eqFiltro ? ' on' : '');
+      b.textContent = name + ' ' + (name === 'Todos' ? orders.length : orders.filter(o => o.estado === name).length);
+      b.addEventListener('click', () => { eqFiltro = name; eqResetView(); renderEquipos(); });
+      chips.appendChild(b);
+    });
+    const full = eqFilter(orders.filter(o => eqFiltro === 'Todos' || o.estado === eqFiltro));
+    const list = eqSlice(full);
+    let html = '<div class="eq-hd"><span>ID / Recepción</span><span>Cliente / Teléfono</span><span>Equipo / Categoría</span><span>Monto ($) / Falla</span><span>Técnico / Entrega Estimada</span><span class="eq-c">Panel Técnico</span><span>Estatus</span></div>';
+    if (!list.length){
+      html += '<div class="eq-empty">' + (orders.length ? (eqQ.trim() ? 'No hay equipos que coincidan con la búsqueda.' : 'No hay equipos en este estado.') : 'Aún no hay equipos registrados. Completa el formulario y pulsa «Registrar ingreso».') + '</div>';
+    }
+    list.forEach(o => {
+      const color = (EQ_ESTADOS.find(e => e[0] === o.estado) || EQ_ESTADOS[0])[1];
+      const n = daysT(o);
+      const msg = 'Hola ' + o.cliente + ', te saludamos de Servicio Técnico. Tu orden ' + o.id + ' (' + o.modelo + ') se encuentra en estado: ' + o.estado + '.';
+      const wa = 'https://wa.me/58' + o.telefono.replace(/\D/g, '') + '?text=' + encodeURIComponent(msg);
+      html += '<div class="eq-rw">'
+        + '<div class="eq-cl"><div class="eq-p1 eq-id">' + esc(o.id) + '</div><div class="eq-p2">' + fmtISO(o.fechaRec) + '</div></div>'
+        + '<div class="eq-cl"><div class="eq-p1" title="' + esc(o.cliente) + '">' + esc(o.cliente) + '</div><div class="eq-p2">' + esc(o.telefono) + '</div></div>'
+        + '<div class="eq-cl"><div class="eq-p1" title="' + esc(o.modelo) + '">' + esc(o.modelo) + '</div><div class="eq-p2">' + esc(o.categoria) + '</div></div>'
+        + '<div class="eq-cl"><div class="eq-p1">' + (o.monto ? esc(o.monto) : '—') + '</div><div class="eq-p2" title="' + esc(o.falla) + '">' + esc(o.falla) + '</div></div>'
+        + '<div class="eq-cl"><div class="eq-p1" title="' + esc(o.tecnico || 'Sin asignar') + '">' + esc(o.tecnico || 'Sin asignar') + '</div>' + (o.fechaEst ? '<div class="eq-p2">' + fmtISO(o.fechaEst) + '</div>' : '') + '</div>'
+        + '<div class="eq-cl eq-c"><button type="button" class="eq-nivel" data-enf="' + esc(o.id) + '" style="--c:' + ENF_PASOS[enfNivel(o)][1] + '" title="Panel técnico" aria-label="Panel técnico de ' + esc(o.id) + ': ' + ENF_PASOS[enfNivel(o)][0] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ENF_ICONOS[enfNivel(o)] + '</svg><span>' + ENF_PASOS[enfNivel(o)][0] + '</span></button></div>'
+        + '<div class="eq-cl eq-c"><span class="eq-pill" style="--c:' + color + '">' + esc(o.estado) + '</span></div>'
+        + '</div>';
+    });
+    document.getElementById('eqTable').innerHTML = html;
+    eqFooter(full);
+  }
+
+  // ===== Panel Técnico: notas, repuestos, montos/margen, estatus por ícono y guardado =====
+  // Catálogo de ejemplo mientras el módulo Inventario no tenga existencias reales: [id, nombre, costo, stock]
+  const ENF_CATALOGO = [['p1','Pasta térmica (jeringa)',4.5,12],['p2','Puerto HDMI PS5',9,6],['p3','Lector de disco Xbox',28,3],['p4','Joystick analógico (par)',3.8,25],['p5','Ventilador PS4',11.5,5],['p6','Disco SSD 500 GB',42,4],['p7','Flux / pasta de soldar',2.4,15],['p8','Cable flex DualSense',6.2,8]];
+  const enfCat = id => ENF_CATALOGO.find(c => c[0] === id);
+  const enfNum = v => { let s = String(v == null ? '' : v).replace(/[^0-9.,-]/g, ''); s = s.includes('.') ? s.replace(/,/g, '') : s.replace(',', '.'); const n = parseFloat(s); return isNaN(n) ? 0 : n; };
+  const enfMoney = n => (n < 0 ? '-$' : '$') + Math.abs(n).toFixed(2);
+  let W = null;
+  const enfOtras = id => orders.reduce((t, x) => x.id === W.o.id ? t : t + (((x.repuestos || []).find(r => r.id === id) || {}).qty || 0), 0);
+  const enfDisp = id => enfCat(id)[3] - enfOtras(id) - ((W.reps.find(r => r.id === id) || {}).qty || 0);
+
+  function enfLowInit(o){
+    W = { o, nivel: enfNivel(o), notas: o.notas || '', adj: o.montoAjustado || '', reps: (o.repuestos || []).map(r => ({ ...r })), dirty: false, msg: '' };
+  }
+  // Margen = (monto ajustado si es distinto de cero, si no el monto) - costo de repuestos
+  function enfCalc(){
+    const monto = enfNum(W.o.monto), adj = enfNum(W.adj);
+    const costo = W.reps.reduce((t, r) => t + r.qty * r.costo, 0);
+    return { monto, adj, costo, margen: (adj !== 0 ? adj : monto) - costo };
+  }
+
+  function enfRenderParts(){
+    const sel = document.getElementById('enfSel'); const keep = sel.value;
+    sel.innerHTML = '<option value="">Selecciona un repuesto…</option>' + ENF_CATALOGO.map(c => { const d = enfDisp(c[0]); return '<option value="' + c[0] + '"' + (d <= 0 ? ' disabled' : '') + '>' + esc(c[1]) + ' · ' + enfMoney(c[2]) + ' · ' + (d <= 0 ? 'agotado' : 'quedan ' + d) + '</option>'; }).join('');
+    sel.value = keep;
+    const box = document.getElementById('enfRows');
+    if (!W.reps.length){ box.innerHTML = '<div class="enf-empty">Aún no hay repuestos. Elige uno y pulsa + para cargarlo.</div>'; return; }
+    box.innerHTML = W.reps.map(r => {
+      const d = enfDisp(r.id);
+      return '<div class="enf-row"><span class="enf-rn"><b>' + esc(r.nombre) + '</b><small>' + enfMoney(r.costo) + ' c/u · quedan ' + d + '</small></span>'
+        + '<div class="enf-q"><button type="button" class="enf-pm minus" data-q="-" data-id="' + r.id + '" aria-label="Quitar uno">−</button><span>' + r.qty + '</span><button type="button" class="enf-pm plus" data-q="+" data-id="' + r.id + '" aria-label="Agregar uno"' + (d <= 0 ? ' disabled' : '') + '>+</button></div>'
+        + '<span class="enf-rs">' + enfMoney(r.qty * r.costo) + '</span></div>';
+    }).join('');
+  }
+  function enfRenderSum(){
+    const c = enfCalc();
+    document.getElementById('enfKMonto').textContent = enfMoney(c.monto);
+    document.getElementById('enfKCosto').textContent = enfMoney(c.costo);
+    const m = document.getElementById('enfKMargen'); m.textContent = enfMoney(c.margen); m.style.color = c.margen < 0 ? '#dc2626' : '';
+  }
+  function enfRenderBar(){
+    document.getElementById('enfBar').innerHTML = '<div class="enf-acts"><button type="button" class="enf-btn is-save" id="enfSave"' + (W.dirty ? '' : ' disabled') + '>Guardar</button></div>';
+  }
+  function enfUpdateSteps(){
+    enfBox.style.setProperty('--c', ENF_PASOS[W.nivel][1]);
+    enfBox.querySelectorAll('.enf-step').forEach((li, i) => { li.classList.toggle('is-active', i === W.nivel); if (i === W.nivel) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+  }
+  function enfSetDirty(){ W.dirty = true; W.msg = ''; enfRenderBar(); }
+  function enfAfterParts(){ enfRenderParts(); enfRenderSum(); enfSetDirty(); }
+  function enfGo(n){ if (n === W.nivel) return; W.nivel = n; enfSetDirty(); enfUpdateSteps(); }
+  function enfSave(){
+    const o = W.o;
+    o.enfoque = W.nivel; o.notas = W.notas; o.montoAjustado = W.adj.trim();
+    o.repuestos = W.reps.map(r => ({ ...r }));
+    saveOrders(); renderEquipos();
+    W.dirty = false;
+    enfRenderBar(); enfRenderParts();
+  }
+  // Aviso al salir con cambios sin guardar
+  function enfAskExit(){
+    let d = document.getElementById('enfWarn');
+    if (d) { d.remove(); return; }
+    d = document.createElement('div'); d.id = 'enfWarn'; d.className = 'enf-warn';
+    d.setAttribute('role', 'alertdialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-labelledby', 'enfWarnT');
+    d.innerHTML = '<div class="enf-warn-box"><h4 id="enfWarnT"><span style="color:#d97706">⚠</span> Tienes cambios sin guardar</h4><p>Si sales ahora se perderán los cambios hechos en estatus, notas, repuestos y monto ajustado.</p>'
+      + '<div class="enf-warn-acts"><button type="button" class="enf-btn is-ghost" data-w="stay">Cancelar</button><button type="button" class="enf-btn is-ghost" data-w="discard">Salir sin guardar</button><button type="button" class="enf-btn is-save" data-w="save">Guardar y salir</button></div></div>';
+    enfEl.appendChild(d);
+    d.addEventListener('click', e => {
+      const b = e.target.closest('[data-w]');
+      if (!b) { if (e.target === d) d.remove(); return; }
+      d.remove();
+      if (b.dataset.w === 'discard') { W.dirty = false; enfEl.hidden = true; }
+      else if (b.dataset.w === 'save') { enfSave(); enfEl.hidden = true; }
+    });
+    const wb = d.querySelector('.enf-warn-box'); wb.setAttribute('tabindex', '-1'); wb.focus();
+  }
+  window.addEventListener('beforeunload', e => { if (W && W.dirty && enfEl && !enfEl.hidden) { e.preventDefault(); e.returnValue = ''; } });
+
+  function enfLowHTML(){
+    return '<div class="enf-low" id="enfLow">'
+      + '<div class="enf-kpis">'
+      + '<div class="enf-kc"><span class="enf-kl">Monto ($)</span><b id="enfKMonto"></b></div>'
+      + '<div class="enf-kc"><span class="enf-kl">Costo ($) repuestos</span><b id="enfKCosto"></b></div>'
+      + '<div class="enf-kc"><span class="enf-kl">Margen ($)</span><b id="enfKMargen"></b></div>'
+      + '<div class="enf-kc is-adj" id="enfKAdj"><label class="enf-kl" for="enfAdj">Monto ($) ajustado</label><div class="enf-adjw"><span>$</span><input type="text" id="enfAdj" inputmode="decimal" placeholder="0.00" autocomplete="off"></div></div>'
+      + '</div>'
+      + '<div class="enf-cols">'
+      + '<section class="enf-card enf-notes"><header class="enf-ch"><h3>Notas del técnico</h3></header><textarea id="enfNotas" rows="8" placeholder="Diagnóstico, pruebas realizadas, pendientes…" aria-label="Notas del técnico"></textarea></section>'
+      + '<section class="enf-card enf-parts"><header class="enf-ch"><h3>Repuestos</h3></header><div class="enf-add"><select id="enfSel" aria-label="Repuesto"></select><button type="button" class="enf-pm plus" id="enfAdd" aria-label="Agregar repuesto">+</button></div><div class="enf-rows" id="enfRows"></div></section>'
+      + '</div><div class="enf-bar" id="enfBar"></div></div>';
+  }
+  function enfLowBind(){
+    const low = document.getElementById('enfLow');
+    enfRenderParts(); enfRenderSum(); enfRenderBar();
+    const ta = document.getElementById('enfNotas');
+    ta.value = W.notas; ta.addEventListener('input', () => { W.notas = ta.value; enfSetDirty(); });
+    const adj = document.getElementById('enfAdj');
+    adj.value = W.adj;
+    adj.addEventListener('input', () => {
+      // solo números y un punto decimal (máx. 2 decimales); la coma se toma como punto
+      let v = adj.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); const i = v.indexOf('.');
+      if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 2);
+      if (v !== adj.value) adj.value = v;
+      W.adj = v; enfRenderSum(); enfSetDirty();
+    });
+    adj.addEventListener('blur', () => { const n = enfNum(adj.value); adj.value = W.adj = n !== 0 ? n.toFixed(2) : ''; enfRenderSum(); });
+    // El estatus se cambia pulsando cada ícono del wizard
+    const steps = enfBox.querySelector('.enf-steps');
+    steps.addEventListener('click', e => { const li = e.target.closest('[data-go]'); if (li) enfGo(parseInt(li.dataset.go, 10)); });
+    steps.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const li = e.target.closest('[data-go]'); if (li) { e.preventDefault(); enfGo(parseInt(li.dataset.go, 10)); } } });
+    low.addEventListener('click', e => {
+      const q = e.target.closest('[data-q]');
+      if (q) {
+        const r = W.reps.find(x => x.id === q.dataset.id); if (!r) return;
+        if (q.dataset.q === '+') { if (enfDisp(r.id) <= 0) return; r.qty++; }
+        else { r.qty--; if (r.qty <= 0) W.reps = W.reps.filter(x => x !== r); }
+        enfAfterParts(); return;
+      }
+      if (e.target.closest('#enfAdd')) {
+        const sel = document.getElementById('enfSel'); const c = enfCat(sel.value);
+        if (!c) { sel.focus(); return; }
+        if (enfDisp(c[0]) <= 0) return;
+        const r = W.reps.find(x => x.id === c[0]);
+        if (r) r.qty++; else W.reps.push({ id: c[0], nombre: c[1], costo: c[2], qty: 1 });
+        enfAfterParts(); return;
+      }
+      if (e.target.closest('#enfSave')) enfSave();
+    });
+  }
+
+  function enfInfoHTML(o, gar){
+    const campos = [
+      ['ID', o.id], ['Recepción', o.fechaRec ? fmtISO(o.fechaRec) : ''], ['Cliente', o.cliente], ['Teléfono', o.telefono], ['Categoría', o.categoria], ['Modelo / Equipo', o.modelo],
+      ['Serial / ID', o.serial || ''], ['Descripción de la falla', o.falla || '', true], ['Técnico', o.tecnico || (gar ? '' : 'Sin asignar')], ['Monto ($)', o.monto || ''], ['Entrega estimada', o.fechaEst ? fmtISO(o.fechaEst) : '']
+    ];
+    return '<div class="enf-info">' + campos.map(c => '<div class="enf-f' + (c[2] ? ' is-wide' : '') + '"><span class="enf-fl">' + c[0] + '</span><span class="enf-fv" title="' + esc(c[1]) + '">' + esc(c[1]) + '</span></div>').join('') + '</div>';
+  }
+
+  function renderEnfSteps(activo, o){
+    document.getElementById('enfBody').innerHTML = (o ? enfInfoHTML(o) : '') + '<ol class="enf-steps" aria-label="Secuencia de la reparación">'
+      + ENF_PASOS.map((p, i) => '<li class="enf-step' + (i === activo ? ' is-active' : '') + '" style="--c:' + p[1] + '" data-go="' + i + '" tabindex="0" role="button" aria-label="Cambiar estatus a ' + p[0] + '"' + (i === activo ? ' aria-current="step"' : '') + '><span class="enf-dot">' + i + '</span><span class="enf-lbl">' + p[0] + '</span></li>').join('')
+      + '</ol>' + (o ? enfLowHTML() : '');
+    if (o) enfLowBind();
+  }
+  const enfEl = document.getElementById('enfoqueModal');
+  const enfBox = enfEl.querySelector('.enf-box');
+  const closeEnf = () => { if (W && W.dirty && !enfEl.hidden) { enfAskExit(); return; } enfEl.hidden = true; };
+  document.getElementById('eqTable').addEventListener('click', e => {
+    const c = e.target.closest('[data-enf]'); if (!c) return;
+    const o = orders.find(x => x.id === c.dataset.enf); if (!o) return;
+    enfEl.dataset.id = o.id;
+    enfBox.style.setProperty('--c', ENF_PASOS[enfNivel(o)][1]);
+    enfLowInit(o);
+    renderEnfSteps(enfNivel(o), o);
+    enfEl.hidden = false; document.getElementById('enfClose').focus();
+  });
+  document.getElementById('enfClose').addEventListener('click', closeEnf);
+  enfEl.addEventListener('mousedown', e => { if (e.target === enfEl) closeEnf(); });
+  document.addEventListener('keydown', e => { if (!enfEl.hidden && e.key === 'Escape') closeEnf(); });
+
+  // ===== Garantía: buscador de ID (pantalla desplegable) y traslado de datos a Recepción =====
+  const garEl = document.getElementById('garantiaModal');
+  const garPanel = document.getElementById('recepcionPanel');
+  const garH2 = garPanel.querySelector('h2'); const GAR_H2 = garH2.innerHTML;
+  const garBtns = garPanel.querySelectorAll('.gar-seg button');
+  const garInput = document.getElementById('garInput'), garList = document.getElementById('garList'), garInfo = document.getElementById('garInfo'), garSelect = document.getElementById('garSelect');
+  const GAR_BLANK = { id: '', fechaRec: '', cliente: '', telefono: '', categoria: '', modelo: '', serial: '', falla: '', tecnico: '', monto: '', fechaEst: '' };
+  let garMode = false, garSrc = null, garSel = null, garHi = -1;
+
+  // ID de la garantía = ID original + G (si ya existe, R-0005G2, R-0005G3…)
+  const garNewId = src => { const base = src.id.replace(/G\d*$/, ''); let id = base + 'G', n = 2; while (orders.some(x => x.id === id)) id = base + 'G' + n++; return id; };
+  const garNorm = t => String(t || '').toUpperCase().replace(/\s+/g, '');
+  const garMatches = q => { q = garNorm(q); return q ? orders.filter(o => o.id.toUpperCase().includes(q)).slice(0, 6) : []; };
+
+  function garShow(o){ garInfo.innerHTML = enfInfoHTML(o || GAR_BLANK, true); garSelect.disabled = !o; }
+  function garRenderList(){
+    const q = garInput.value.trim();
+    if (!q || garSel) { garList.hidden = true; return; }
+    const list = garMatches(q); garHi = list.length ? 0 : -1;
+    garList.innerHTML = list.length ? list.map((o, i) => '<button type="button" class="gar-opt' + (i === 0 ? ' is-hi' : '') + '" data-id="' + esc(o.id) + '"><b>' + esc(o.id) + '</b><span>' + esc(o.cliente) + ' · ' + esc(o.modelo) + '</span><em>' + esc(o.estado) + '</em></button>').join('')
+      : '<div class="gar-none">No hay equipos con ese ID.</div>';
+    garList.hidden = false;
+  }
+  function garLoad(o){ garSel = o; garInput.value = o.id; garList.hidden = true; garShow(o); }
+  function garPill(g){ garBtns[0].classList.toggle('is-on', !g); garBtns[0].setAttribute('aria-pressed', String(!g)); garBtns[1].classList.toggle('is-on', g); garBtns[1].setAttribute('aria-pressed', String(g)); }
+  function garOpen(){ garPill(true); garSel = null; garInput.value = ''; garList.hidden = true; garShow(null); garEl.hidden = false; garInput.focus(); }
+  const garClose = () => { garEl.hidden = true; garPill(garMode); };
+
+  garInput.addEventListener('input', () => { garSel = null; garShow(null); garRenderList(); });
+  garInput.addEventListener('keydown', e => {
+    const opts = [...garList.querySelectorAll('.gar-opt')];
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!opts.length) return; e.preventDefault();
+      garHi = (garHi + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length;
+      opts.forEach((b, i) => b.classList.toggle('is-hi', i === garHi));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const exact = orders.find(o => garNorm(o.id) === garNorm(garInput.value));
+      const pick = exact || (opts[garHi] && orders.find(o => o.id === opts[garHi].dataset.id));
+      if (pick) garLoad(pick);
+    }
+  });
+  garList.addEventListener('mousedown', e => { const b = e.target.closest('.gar-opt'); if (!b) return; e.preventDefault(); const o = orders.find(x => x.id === b.dataset.id); if (o) garLoad(o); });
+  document.getElementById('garClose').addEventListener('click', garClose);
+  garEl.addEventListener('mousedown', e => { if (e.target === garEl) garClose(); });
+  document.addEventListener('keydown', e => { if (!garEl.hidden && e.key === 'Escape') garClose(); });
+
+  function garSetMode(on){
+    garMode = on;
+    garBtns[0].classList.toggle('is-on', !on); garBtns[0].setAttribute('aria-pressed', String(!on));
+    garBtns[1].classList.toggle('is-on', on); garBtns[1].setAttribute('aria-pressed', String(on));
+    garH2.innerHTML = on ? 'Registro de garantía' : GAR_H2;
+    const m = document.getElementById('rf-costo'); m.disabled = on; if (on) m.value = '0,00';
+  }
+  function garResetForm(){
+    document.getElementById('recepcionForm').reset();
+    ['rf-fecha', 'rf-entrega'].forEach(id => { const el = document.getElementById(id); if (el._clear) el._clear(); });
+    renderModeloSelect(); document.querySelectorAll('#recepcionPanel select').forEach(syncEmpty);
+  }
+  // Trae a Recepción los datos del equipo; Recepción y Entrega estimada se llenan de nuevo; Monto queda inhabilitado
+  function garApply(o){
+    garSrc = o; garResetForm();
+    const val = (id, v) => { document.getElementById(id).value = v || ''; };
+    val('rf-cliente', o.cliente); val('rf-telefono', o.telefono); val('rf-serial', o.serial); val('rf-falla', o.falla);
+    const selSet = (sel, v) => { if (v && ![...sel.options].some(op => op.value === v)) sel.appendChild(new Option(v, v)); sel.value = v || ''; syncEmpty(sel); };
+    selSet(document.getElementById('rf-categoria'), o.categoria); renderModeloSelect(); selSet(document.getElementById('rf-modelo'), o.modelo);
+    garSetMode(true);
+  }
+  garBtns[1].addEventListener('click', garOpen);
+  garBtns[0].addEventListener('click', () => { if (garMode) { garSetMode(false); garResetForm(); } });
+  garSelect.addEventListener('click', () => { if (!garSel) return; garApply(garSel); garClose(); });
+
+  const tkEl = document.getElementById('ticketModal');
+  document.getElementById('eqTable').addEventListener('click', e => {
+    const b = e.target.closest('[data-ticket]'); if (!b) return;
+    const o = orders.find(x => x.id === b.dataset.ticket); if (!o) return;
+    const rows = [['Orden', o.id], ['Recibido', fmtISO(o.fechaRec)], ['Cliente', o.cliente], ['Teléfono', o.telefono], ['Equipo', o.modelo + ' (' + o.categoria + ')'], ['Serial / ID', o.serial || '—'],
+      ['Falla', o.falla], ['Técnico', o.tecnico || 'Sin asignar'], ['Entrega estimada', fmtISO(o.fechaEst)], ['Monto ($)', o.monto || '—'], ['Estado', o.estado], ['Entrega', fmtISO(o.fechaEnt)]];
+    document.getElementById('tkBody').innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>').join('');
+    tkEl.hidden = false; document.getElementById('tkClose').focus();
+  });
+  const closeTicket = () => { tkEl.hidden = true; };
+  document.getElementById('tkClose').addEventListener('click', closeTicket);
+  document.getElementById('tkPrint').addEventListener('click', () => window.print());
+  tkEl.addEventListener('mousedown', e => { if (e.target === tkEl) closeTicket(); });
+  document.addEventListener('keydown', e => { if (!tkEl.hidden && e.key === 'Escape') closeTicket(); });
+
+  document.getElementById('recepcionForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const dateIds = ['rf-fecha', 'rf-entrega'];
+    const missing = dateIds.map(id => document.getElementById(id)).filter(el => !el.dataset.iso);
+    dateIds.forEach(id => document.getElementById(id).classList.remove('is-invalid'));
+    if (missing.length){ missing.forEach(el => el.classList.add('is-invalid')); missing[0].focus(); return; }
+    const v = id => document.getElementById(id).value.trim();
+    const next = orders.reduce((mx, o) => Math.max(mx, parseInt(o.id.slice(2), 10) || 0), 0) + 1;
+    orders.unshift({
+      id: garMode ? garNewId(garSrc) : 'R-' + String(next).padStart(4, '0'), fechaRec: document.getElementById('rf-fecha').dataset.iso,
+      cliente: v('rf-cliente'), telefono: v('rf-telefono'), categoria: v('rf-categoria'), modelo: v('rf-modelo'),
+      serial: v('rf-serial'), falla: v('rf-falla'), tecnico: v('rf-tecnico'), monto: garMode ? '0,00' : v('rf-costo'), estado: garMode ? 'Garantía' : 'En Reparación', fechaEnt: '',
+      fechaEst: document.getElementById('rf-entrega').dataset.iso, garantiaDe: garMode && garSrc ? garSrc.id : undefined
+    });
+    saveOrders();
+    garSetMode(false);
+    eqResetView();
+    e.target.reset();
+    const f = document.getElementById('rf-fecha'); if (f._clear) f._clear();
+    const fe = document.getElementById('rf-entrega'); if (fe._clear) fe._clear();
+    renderModeloSelect();
+    document.querySelectorAll('#recepcionPanel select').forEach(syncEmpty);
+    renderEquipos();
+  });
+  renderEquipos();
+</script>
+</body>
+</html>
